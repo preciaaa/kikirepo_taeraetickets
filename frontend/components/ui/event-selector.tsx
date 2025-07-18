@@ -32,8 +32,7 @@ export function EventSelector({ selectedEvent, onEventSelect }: EventSelectorPro
   const [eventLoading, setEventLoading] = useState(false)
   const [eventError, setEventError] = useState<string | null>(null)
   const [creatingEvent, setCreatingEvent] = useState(false)
-  const [scrapedEvent, setScrapedEvent] = useState<any>(null)
-  const [creatingModal, setCreatingModal] = useState(false)
+  const [scrapedEvent, setScrapedEvent] = useState<unknown>(null)
   const [showScrapeModal, setShowScrapeModal] = useState(false)
 
 
@@ -141,7 +140,7 @@ export function EventSelector({ selectedEvent, onEventSelect }: EventSelectorPro
                 </Button>
                 <Button
                   onClick={async () => {
-                    setCreatingModal(true)
+                    setCreatingEvent(true)
                     try {
                       const res = await fetch(apiRoutes.createEvent, {
                         method: 'POST',

@@ -3,7 +3,6 @@
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
-  DialogTrigger,
   DialogContent,
   DialogHeader,
   DialogTitle,
@@ -13,6 +12,7 @@ import {
 import { supabase } from "@/lib/supabaseClient";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useCallback } from "react";
+import Image from 'next/image';
 
 interface Payment {
   payment_id: string;
@@ -271,9 +271,11 @@ export default function ProfilePage() {
             {/* Profile Pic and Username */}
             <div className="flex flex-col items-center">
               <div className="relative">
-                <img
+                <Image
                   src={selectedPic}
                   alt="Profile"
+                  width={160}
+                  height={160}
                   className="w-40 h-40 object-contain"
                 />
                 <button
@@ -332,9 +334,11 @@ export default function ProfilePage() {
                             : "border-transparent"
                         }`}
                       >
-                        <img
+                        <Image
                           src={img}
                           alt="Option"
+                          width={120}
+                          height={120}
                           className="w-20 h-20 object-contain rounded-md mx-auto"
                         />
                       </button>

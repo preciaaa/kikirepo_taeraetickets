@@ -44,8 +44,8 @@ export default function OnboardingPage() {
       } else {
         setError(data.error || 'Failed to create Stripe account')
       }
-    } catch (err: any) {
-      setError('Unexpected error: ' + err.message)
+    } catch (err: unknown) {
+      setError('Unexpected error: ' + (err as Error).message)
     }
     setLoading(false)
   }

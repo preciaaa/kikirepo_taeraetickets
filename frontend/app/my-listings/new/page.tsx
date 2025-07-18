@@ -3,7 +3,7 @@ import { useState, useCallback, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useDropzone } from "react-dropzone"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { toast } from "sonner"
@@ -11,6 +11,7 @@ import { Upload, FileText, Loader2, CheckCircle, AlertCircle } from "lucide-reac
 import { supabase } from "@/lib/supabaseClient"
 import { EventSelector } from "@/components/ui/event-selector"
 import { apiRoutes } from "@/lib/apiRoutes"
+import Image from 'next/image';
 
 interface ExtractedFields {
   date?: string
@@ -36,7 +37,6 @@ export default function NewIndividualListing() {
   const [maxPrice, setMaxPrice] = useState<number>(150)
   const [priceLoading, setPriceLoading] = useState(false)
   const [originalPrice, setOriginalPrice] = useState<number | null>(null)
-  const [originalPriceFromOCR, setOriginalPriceFromOCR] = useState(false)
   const [showManualInput, setShowManualInput] = useState(false)
   const router = useRouter()
 
@@ -204,7 +204,6 @@ export default function NewIndividualListing() {
         const priceValue = parseFloat(result.parsed.price.replace(/[^\d.]/g, ""))
         if (!isNaN(priceValue)) {
           setOriginalPrice(priceValue)
-          setOriginalPriceFromOCR(true)
         }
       }
       
@@ -335,9 +334,11 @@ export default function NewIndividualListing() {
                       <FileText className="w-16 h-16 text-purple-500" />
                     </div>
                   ) : (
-                    <img
+                    <Image
                       src={preview}
                       alt="Preview"
+                      width={256}
+                      height={192}
                       className="max-w-full max-h-64 mx-auto rounded-xl shadow"
                     />
                   )}

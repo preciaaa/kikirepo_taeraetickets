@@ -1,9 +1,8 @@
 "use client";
 
 import React from 'react';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Shield, DollarSign, Lock, Users, CheckCircle, MessageSquare, Sparkles, ArrowRight, Star } from 'lucide-react';
+import { Shield, DollarSign, Lock, Users, CheckCircle, MessageSquare, Sparkles } from 'lucide-react';
 
 const LandingPage = () => {
   return (

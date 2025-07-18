@@ -16,12 +16,9 @@ export default function VerificationPage() {
   const router = useRouter()
   const [file, setFile] = useState<File | null>(null)
   const [next, setNext] = useState<boolean>(false)
-  const [match, setMatch] = useState<boolean | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [startVerification, setStartVerification] = useState(false)
-  const [timer, setTimer] = useState(0)
-  const [showTimeoutWarning, setShowTimeoutWarning] = useState(false)
   const [userId, setUserId] = useState<string | null>(null)
 
   useEffect(() => {
@@ -40,7 +37,6 @@ export default function VerificationPage() {
   const onDrop = useCallback((acceptedFiles: File[]) => {
     if (acceptedFiles.length > 0) {
       setFile(acceptedFiles[0])
-      setMatch(null)
       setError(null)
     }
   }, [])
@@ -77,11 +73,14 @@ export default function VerificationPage() {
 
       if (!response.ok) throw new Error('Failed to extract embedding.')
 
-      const responseData = await response.json()
       setNext(true)
       setStartVerification(true) // <- Start webcam verification loop
-    } catch (err: any) {
-      setError(err.message || 'Something went wrong.')
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message || 'Something went wrong.')
+      } else {
+        setError('Something went wrong.')
+      }
     } finally {
       setLoading(false)
     }
@@ -119,7 +118,6 @@ export default function VerificationPage() {
         const result = await compareRes.json()
 
         if (result.match) {
-          setMatch(true)
           setStartVerification(false)
           clearInterval(interval)
           clearTimeout(timeout)
@@ -131,15 +129,12 @@ export default function VerificationPage() {
 
     if (startVerification) {
       interval = setInterval(() => {
-        setTimer(prev => prev + 1)
         runVerification()
       }, 1000)
 
       timeout = setTimeout(() => {
         clearInterval(interval)
         setStartVerification(false)
-        setMatch(false)
-        setShowTimeoutWarning(true)
       }, 15000)
     }
 

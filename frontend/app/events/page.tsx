@@ -180,9 +180,11 @@ export default function EventsPage() {
                     onClick={() => router.push(`/events/${slugify(event.title)}?id=${event.id}`)}
                     >
                     {event.img_url ? (
-                      <img
+                      <Image
                         src={event.img_url}
                         alt={event.title}
+                        width={370}
+                        height={240}
                         className="w-full h-60 object-cover rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-100 dark:bg-zinc-800"
                       />
                     ) : (
@@ -226,9 +228,11 @@ export default function EventsPage() {
                     onClick={() => router.push(`/events/${slugify(event.title)}?id=${event.id}`)}
                   >
                     {event.img_url ? (
-                      <img
+                      <Image
                         src={event.img_url}
                         alt={event.title}
+                        width={370}
+                        height={240}
                         className="w-full h-60 object-cover rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-100 dark:bg-zinc-800"
                       />
                     ) : (

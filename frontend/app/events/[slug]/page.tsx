@@ -3,7 +3,7 @@
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { set, useForm } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
 import { useEffect, useMemo, useState } from 'react'
@@ -269,12 +269,12 @@ export default function EventPage({ params }: { params: { slug: string } }) {
         <p className="max-w-md text-sm">
           It looks like there are no listings available for this event right now. Please check back later or explore other events.
         </p>
-        <a
+        <Link
           href="/events"
           className="mt-6 inline-block px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded transition"
         >
           Browse All Events
-        </a>
+        </Link>
       </div>
     );
   }
