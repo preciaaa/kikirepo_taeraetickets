@@ -20,11 +20,9 @@ const stripePromise = loadStripe(
 const CheckoutForm = ({
   clientSecret,
   userId,
-  listingsId,
 }: {
   clientSecret: string;
   userId: string | null;
-  listingsId: string;
 }) => {
   const stripe = useStripe();
   const elements = useElements();
@@ -72,9 +70,10 @@ const CheckoutForm = ({
         );
 
         router.push("/profile");
-      } catch (err: any) {
-        console.error("Payment success error:", err);
-        alert(err.message || "Payment succeeded but failed to update backend.");
+      } catch (err: unknown) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        console.error("Payment success error:", error);
+        alert(error.message || "Payment succeeded but failed to update backend.");
       } finally {
         setSubmitting(false);
       }
@@ -91,6 +90,16 @@ const CheckoutForm = ({
   );
 };
 
+type ListingSummary = {
+  event_name: string;
+  date: string;
+  totalPrice: number;
+};
+
+type ListingWithSummary = {
+  summary: ListingSummary;
+};
+
 export default function CheckoutPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -99,7 +108,7 @@ export default function CheckoutPage() {
 
   const [userId, setUserId] = useState<string | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
-  const [listing, setListing] = useState<any | null>(null);
+  const [listing, setListing] = useState<ListingWithSummary | null>(null);
   const [loading, setLoading] = useState(true);
 
   const calledCheckout = useRef(false);
@@ -143,9 +152,10 @@ export default function CheckoutPage() {
         const checkoutRes = await checkoutResponse.json();
         setClientSecret(checkoutRes.clientSecret);
         localStorage.setItem("payment_id", checkoutRes.payment_id);
-      } catch (err: any) {
-        console.error(err);
-        alert(err.message || "Failed to load listing or initiate payment");
+      } catch (err: unknown) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        console.error(error);
+        alert(error.message || "Failed to load listing or initiate payment");
         router.push("/events");
       } finally {
         setLoading(false);
@@ -156,7 +166,7 @@ export default function CheckoutPage() {
   }, [userId, listings_id, router]);
 
   if (loading) return <p>Loading...</p>;
-  if (!clientSecret || !listing) return <p>Failed to load payment</p>;
+  if (!clientSecret || !listing || !listing.summary) return <p>Failed to load payment</p>;
 
   return (
     <div className="max-w-xl mx-auto mt-10 bg-white p-6 rounded shadow">
@@ -164,16 +174,15 @@ export default function CheckoutPage() {
       <div className="border p-3 mb-3 rounded">
         <div className="font-semibold">{listing.summary.event_name || "Event"}</div>
         <div className="text-sm text-gray-600">
-          Date: {new Date(listing.summary.date).toLocaleDateString()}
+          Date: {listing.summary.date ? new Date(listing.summary.date).toLocaleDateString() : "-"}
           <br />
-          Price: ${listing.summary.totalPrice}
+          Price: ${listing.summary.totalPrice ?? "-"}
         </div>
       </div>
       <Elements stripe={stripePromise} options={{ clientSecret }}>
         <CheckoutForm
           clientSecret={clientSecret}
           userId={userId}
-          listingsId={listings_id!}
         />
       </Elements>
     </div>

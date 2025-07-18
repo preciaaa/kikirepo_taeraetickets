@@ -16,7 +16,7 @@ import {
 import { apiRoutes } from '@/lib/apiRoutes';
 import Image from 'next/image';
 
-interface Event {
+export interface Event {
   id: string
   title: string
 }
@@ -77,8 +77,7 @@ export function EventSelector({ selectedEvent, onEventSelect }: EventSelectorPro
       } else {
         alert('No results found. Try a different search.')
       }
-    } catch (err) {
-      console.error(err)
+    } catch {
       setEventError('Failed to fetch or create event')
     } finally {
       setCreatingEvent(false)
@@ -165,7 +164,7 @@ export function EventSelector({ selectedEvent, onEventSelect }: EventSelectorPro
                       setEventSearch(data[0].title);
                       setEventSuggestions([]);
                       setShowScrapeModal(false);
-                    } catch (err) {
+                    } catch {
                       setEventError('Failed to create event');
                       setShowScrapeModal(false);
                     }

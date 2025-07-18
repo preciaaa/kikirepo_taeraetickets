@@ -1,5 +1,6 @@
 "use client"
 import { useState, useCallback, useEffect } from "react"
+import type { Event } from '@/components/ui/event-selector';
 import { useRouter } from "next/navigation"
 import { useDropzone } from "react-dropzone"
 import { Button } from "@/components/ui/button"
@@ -7,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { toast } from "sonner"
-import { Upload, FileText, Loader2, CheckCircle, AlertCircle } from "lucide-react"
+import { Upload, FileText, Loader2, CheckCircle } from "lucide-react"
 import { supabase } from "@/lib/supabaseClient"
 import { EventSelector } from "@/components/ui/event-selector"
 import { apiRoutes } from "@/lib/apiRoutes"
@@ -29,10 +30,8 @@ export default function NewIndividualListing() {
   const [ticketUploaded, setTicketUploaded] = useState(false)
   const [listingUploading, setListingUploading] = useState(false)
   const [extractedFields, setExtractedFields] = useState<ExtractedFields>({})
-  const [extractedText, setExtractedText] = useState<string>("")
-  const [isScanned, setIsScanned] = useState(false)
-  const [selectedEvent, setSelectedEvent] = useState<any | null>(null)
-  const [processedData, setProcessedData] = useState<any>(null)
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null)
+  const [processedData, setProcessedData] = useState<unknown>(null)
   const [selectedPrice, setSelectedPrice] = useState<number>(0)
   const [maxPrice, setMaxPrice] = useState<number>(150)
   const [priceLoading, setPriceLoading] = useState(false)
@@ -40,7 +39,7 @@ export default function NewIndividualListing() {
   const [showManualInput, setShowManualInput] = useState(false)
   const router = useRouter()
 
-  const handleSelectEvent = (event: any) => {
+  const handleSelectEvent = (event: Event | null) => {
     setSelectedEvent(event)
   }
 
@@ -48,14 +47,14 @@ export default function NewIndividualListing() {
     return /^\d{4}-\d{2}-\d{2}$/.test(dateStr)
   }
 
-  const calculateMaxPrice = async (event: any) => {
+  const calculateMaxPrice = useCallback(async (event: Event) => {
     setPriceLoading(true)
     try {
       const basePrice = 100
       let maxPrice = basePrice
       
       // Get existing listings for this event
-      const res = await fetch(apiRoutes.getEventListings(event.id));
+      const res = await fetch(apiRoutes.getEventListings(Number(event.id)));
       const existingListings = await res.json();      
       
       const popularityMultiplier = Math.min(1.5, 1 + (existingListings?.length || 0) * 0.1)
@@ -113,13 +112,13 @@ export default function NewIndividualListing() {
     } finally {
       setPriceLoading(false)
     }
-  }
+  }, [extractedFields])
 
   useEffect(() => {
     if (selectedEvent) {
       calculateMaxPrice(selectedEvent)
     }
-  }, [selectedEvent, extractedFields.category, extractedFields.venue, extractedFields.section, extractedFields.date])
+  }, [selectedEvent, extractedFields, calculateMaxPrice])
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const file = acceptedFiles[0]
@@ -188,20 +187,17 @@ export default function NewIndividualListing() {
         throw new Error(errorData.error || `HTTP error! status: ${response.status}`)
       }
 
-      const result = await response.json()
-      const parsed = result.parsed || {}
+      const parsed = (await response.json()).parsed || {}
       
       setExtractedFields({
         ...parsed,
         seat_number: parsed.seat || parsed.seat_number || ""
       })
       
-      setExtractedText(result.extractedText || "")
-      setIsScanned(result.isScanned || false)
-      setProcessedData(result)
+      setProcessedData(response.json())
       
-      if (result.parsed?.price) {
-        const priceValue = parseFloat(result.parsed.price.replace(/[^\d.]/g, ""))
+      if (parsed?.price) {
+        const priceValue = parseFloat(parsed.price.replace(/[^\d.]/g, ""))
         if (!isNaN(priceValue)) {
           setOriginalPrice(priceValue)
         }
@@ -248,8 +244,30 @@ export default function NewIndividualListing() {
         return
       }
 
+      let eventId = Number(selectedEvent.id);
+      function hasEventId(obj: unknown): obj is { eventId: number } {
+        return typeof obj === 'object' && obj !== null && 'eventId' in obj && typeof (obj as { eventId: unknown }).eventId === 'number';
+      }
+      function hasEventDate(obj: unknown): obj is { eventDate: string } {
+        return typeof obj === 'object' && obj !== null && 'eventDate' in obj && typeof (obj as { eventDate: unknown }).eventDate === 'string';
+      }
+      function hasPublicUrl(obj: unknown): obj is { publicUrl: string } {
+        return typeof obj === 'object' && obj !== null && 'publicUrl' in obj && typeof (obj as { publicUrl: unknown }).publicUrl === 'string';
+      }
+      function hasFingerprint(obj: unknown): obj is { fingerprint: string } {
+        return typeof obj === 'object' && obj !== null && 'fingerprint' in obj && typeof (obj as { fingerprint: unknown }).fingerprint === 'string';
+      }
+      function hasEmbedding(obj: unknown): obj is { embedding: unknown } {
+        return typeof obj === 'object' && obj !== null && 'embedding' in obj;
+      }
+      function hasPhash(obj: unknown): obj is { phash: string } {
+        return typeof obj === 'object' && obj !== null && 'phash' in obj && typeof (obj as { phash: unknown }).phash === 'string';
+      }
+      if (hasEventId(processedData)) {
+        eventId = processedData.eventId;
+      }
       const listingData = {
-        event_id: processedData?.eventId || selectedEvent.id,
+        event_id: eventId,
         original_owner_id: user.id,
         event_name: selectedEvent.title,
         section: extractedFields.section || "",
@@ -257,13 +275,13 @@ export default function NewIndividualListing() {
         seat_number: extractedFields.seat_number || null,
         category: extractedFields.category || "General",
         venue: extractedFields.venue || "",
-        date: extractedFields.date || processedData?.eventDate,
+        date: extractedFields.date || (hasEventDate(processedData) ? processedData.eventDate : undefined),
         price: selectedPrice,
-        image_url: processedData?.publicUrl,
+        image_url: hasPublicUrl(processedData) ? processedData.publicUrl : undefined,
         parsed_fields: extractedFields,
-        fingerprint: processedData?.fingerprint,
-        embedding: processedData?.embedding,
-        phash: processedData?.phash
+        fingerprint: hasFingerprint(processedData) ? processedData.fingerprint : undefined,
+        embedding: hasEmbedding(processedData) ? processedData.embedding : undefined,
+        phash: hasPhash(processedData) ? processedData.phash : undefined
       }
 
       // Use the correct API route for creating listings
@@ -280,7 +298,7 @@ export default function NewIndividualListing() {
         throw new Error(errorData.error || `HTTP error! status: ${response.status}`)
       }
 
-      const result = await response.json()
+      await response.json()
       toast.success("Listing created successfully!")
       router.push("/my-listings")
     } catch (error) {
@@ -399,14 +417,7 @@ export default function NewIndividualListing() {
                 </span>
               </div>
             )}
-            {isScanned && (
-              <div className="flex items-start p-4 bg-yellow-50 border border-yellow-200 rounded-lg space-x-3">
-                <AlertCircle className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" />
-                <span className="text-sm text-yellow-800 leading-relaxed">
-                  This appears to be a scanned document. Please verify the extracted details.
-                </span>
-              </div>
-            )}
+            {/* Removed isScanned state and its usage */}
             <div className="grid grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="event_date" className="text-sm font-medium">Event Date</Label>

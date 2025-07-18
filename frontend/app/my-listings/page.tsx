@@ -19,7 +19,7 @@ interface Listing {
   ticket_id: string,
   user_id: string
   image_url: string
-  parsed_fields: Record<string, any>
+  parsed_fields: Record<string, unknown>
   fingerprint: string
   is_verified: boolean | null
   status: string
@@ -37,7 +37,8 @@ interface Listing {
 export default function MyListings() {
   const [listings, setListings] = useState<Listing[]>([])
   const [loading, setLoading] = useState(true)
-  const [user, setUser] = useState<any>(null)
+  interface UserSession { id: string; [key: string]: unknown; }
+  const [user, setUser] = useState<UserSession | null>(null)
   const router = useRouter()
 
   const fetchListings = useCallback(
@@ -77,12 +78,11 @@ export default function MyListings() {
         is_verified: ticket.is_verified,
         status: ticket.status,
         created_at: ticket.created_at,
-        parsed_fields: ticket.parsed_fields
       };
     }
     acc[ticket.listings_id].tickets.push(ticket);
     return acc;
-  }, {} as Record<string, any>);
+  }, {} as Record<string, { listingId: string; tickets: Listing[]; is_verified: boolean | null; status: string; created_at: string; }>);
 
   const checkUserAndFetch = useCallback(async () => {
     try {
@@ -91,10 +91,10 @@ export default function MyListings() {
       } = await supabase.auth.getSession()
 
       if (session?.user) {
-        setUser(session.user)
-        await fetchListings(session.user.id)
+        setUser({ id: session.user.id });
+        await fetchListings(session.user.id);
       } else {
-        router.push('/auth/login')
+        router.push('/auth/login');
       }
     } catch (error) {
       console.error('Error checking user session:', error)
@@ -156,9 +156,10 @@ export default function MyListings() {
       }
   
       await fetchListings(user.id)
-    } catch (error: any) {
-      console.error('Error confirming listing:', error)
-      toast.error(error.message || 'Failed to confirm listing')
+    } catch (error: unknown) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      console.error('Error confirming listing:', err)
+      toast.error(err.message || 'Failed to confirm listing')
     }
   }
   
@@ -238,8 +239,14 @@ export default function MyListings() {
           </Card>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {Object.values(groupedListings).map((listingGroup: any, idx) => {
-              const { listingId, tickets, is_verified, status, created_at, parsed_fields } = listingGroup;
+            {Object.values(groupedListings).map((listingGroup: unknown, idx) => {
+              const { listingId, tickets, is_verified, status, created_at } = listingGroup as {
+                listingId: string;
+                tickets: Listing[];
+                is_verified: boolean | null;
+                status: string;
+                created_at: string;
+              };
               return (
                 <Card
                   key={listingId}
@@ -265,10 +272,10 @@ export default function MyListings() {
                       {tickets.map((ticket: Listing) => (
                         <div key={ticket.fingerprint || ticket.ticket_id} className="border rounded-lg p-3 bg-gray-50">
                           <p><strong>Event Name:</strong> {ticket.event_name}</p>
-                          <p><strong>Section:</strong> {ticket.section || ticket.parsed_fields?.section || '-'}</p>
-                          <p><strong>Row:</strong> {ticket.row || ticket.parsed_fields?.row || '-'}</p>
-                          <p><strong>Seat:</strong> {ticket.seat_number || ticket.parsed_fields?.seat || '-'}</p>
-                          <p><strong>Price:</strong> ${ticket.price || ticket.parsed_fields?.price || '-'}</p>
+                          <p><strong>Section:</strong> {ticket.section || (ticket.parsed_fields && typeof ticket.parsed_fields === 'object' ? (ticket.parsed_fields as { section?: string }).section : '-') || '-'}</p>
+                          <p><strong>Row:</strong> {ticket.row || (ticket.parsed_fields && typeof ticket.parsed_fields === 'object' ? (ticket.parsed_fields as { row?: string }).row : '-') || '-'}</p>
+                          <p><strong>Seat:</strong> {ticket.seat_number || (ticket.parsed_fields && typeof ticket.parsed_fields === 'object' ? (ticket.parsed_fields as { seat?: string }).seat : '-') || '-'}</p>
+                          <p><strong>Price:</strong> ${ticket.price || (ticket.parsed_fields && typeof ticket.parsed_fields === 'object' ? (ticket.parsed_fields as { price?: number }).price : '-') || '-'}</p>
                           <Button
                             variant="outline"
                             size="sm"

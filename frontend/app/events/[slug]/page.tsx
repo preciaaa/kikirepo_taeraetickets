@@ -8,7 +8,6 @@ import { toast } from 'sonner'
 import { z } from 'zod'
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabaseClient'
 import { useSearchParams } from 'next/navigation'
 import { apiRoutes } from '@/lib/apiRoutes';
 
@@ -127,7 +126,7 @@ function chunkConsecutiveSeats(seats: Listing[]): Listing[][] {
   return result;
 }
 
-export default function EventPage({ params }: { params: { slug: string } }) {
+export default function EventPage() {
   const [event, setEvent] = useState<Event | null>(null)
   const [isUserVerified, setIsUserVerified] = useState(false)
   const [listings, setListings] = useState<Listing[]>([])
@@ -173,8 +172,8 @@ export default function EventPage({ params }: { params: { slug: string } }) {
       setIsLoading(true);
       try {
         const [eventRes, listingsRes] = await Promise.all([
-          fetch(apiRoutes.event(eventId)),
-          fetch(apiRoutes.getEventListings(eventId))
+          fetch(apiRoutes.event(String(eventId))),
+          fetch(apiRoutes.getEventListings(Number(eventId)))
         ]);
         if (!eventRes.ok) throw new Error('Failed to fetch event');
         if (!listingsRes.ok) throw new Error('Failed to fetch listings');
@@ -374,7 +373,7 @@ export default function EventPage({ params }: { params: { slug: string } }) {
                               <CommandEmpty>No results found.</CommandEmpty>
                               <CommandGroup>
                                 {seatNumbers.map((seat) => (
-                                  <CommandItem key={seat} onSelect={() => form.setValue('quantity', seat)}>
+                                  <CommandItem key={seat} onSelect={() => form.setValue('quantity', Number(seat))}>
                                     <Check className={cn('mr-2 h-4 w-4', seat === String(field.value) ? 'opacity-100' : 'opacity-0')} />
                                     {seat}
                                   </CommandItem>

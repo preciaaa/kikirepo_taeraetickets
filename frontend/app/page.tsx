@@ -42,7 +42,7 @@ const LandingPage = () => {
               Why taeraetickets?
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              We've built the most secure and fair ticket marketplace to protect both buyers and sellers
+              We&apos;ve built the most secure and fair ticket marketplace to protect both buyers and sellers
             </p>
           </div>
 

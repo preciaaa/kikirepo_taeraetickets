@@ -39,6 +39,7 @@ interface Event {
   description: string
   venue: string
   img_url?: string // Add image_url property
+  listingCount: number
 }
 
 export default function EventsPage() {

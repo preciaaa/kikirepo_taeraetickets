@@ -21,18 +21,18 @@ export default function VerificationPage() {
   const [startVerification, setStartVerification] = useState(false)
   const [userId, setUserId] = useState<string | null>(null)
 
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
+
   useEffect(() => {
     const fetchUser = async () => {
       const { data } = await supabase.auth.getUser()
       if (data?.user) setUserId(data.user.id)
     }
     fetchUser()
-  }, [])
-
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
+  }, [supabase.auth])
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     if (acceptedFiles.length > 0) {
@@ -142,7 +142,7 @@ export default function VerificationPage() {
       clearInterval(interval)
       clearTimeout(timeout)
     }
-  }, [startVerification])
+  }, [startVerification, supabase.auth])
 
   return (
     <div className="max-w-md mx-auto">
@@ -155,8 +155,6 @@ export default function VerificationPage() {
           onFailure={() => {
             setStartVerification(false)
             setNext(false)
-            setMatch(null)
-            setShowTimeoutWarning(true)
           }}
         />
       </div>
