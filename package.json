@@ -1,0 +1,14 @@
+{
+  "dependencies": {
+    "@radix-ui/react-navigation-menu": "^1.2.13",
+    "node-cron": "^4.2.1",
+    "uuid": "^11.1.0"
+  },
+  "scripts": {
+    "dev:all": "concurrently \"npm run dev --prefix backend\" \"uvicorn backend.app:app --port 5002\"  \"npm run dev --prefix frontend\""
+  },
+  "devDependencies": {
+    "@types/uuid": "^10.0.0",
+    "concurrently": "^9.2.0"
+  }
+}

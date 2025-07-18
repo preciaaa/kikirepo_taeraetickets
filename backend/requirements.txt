@@ -1,0 +1,31 @@
+# FastAPI
+fastapi
+uvicorn
+# Flask (for image deduplication)
+flask
+# Supabase client
+supabase
+# Environment variable loader
+python-dotenv
+# Image processing
+pillow
+imagehash
+opencv-python
+numpy
+# ML/Face recognition
+facenet-pytorch
+torch
+torchvision
+# PDF/image conversion
+PyMuPDF
+fitz
+pdf2image
+# HTTP requests
+requests
+# OCR
+mistralai
+# For web scraping (if used)
+beautifulsoup4
+# Any other used packages 
+python-multipart 
+playwright
