@@ -18,6 +18,7 @@ import {
   CarouselPrevious,
   CarouselNext,
 } from '@/components/ui/carousel'
+import Image from 'next/image';
 
 function slugify(text: string) {
   return text 
@@ -186,7 +187,7 @@ export default function EventsPage() {
                       />
                     ) : (
                       <div className="w-full h-60 flex items-center justify-center rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-100 dark:bg-zinc-800">
-                        <img src="/globe.svg" alt="No event image" className="w-16 h-60 opacity-40" />
+                        <Image src="/globe.svg" alt="No event image" width={64} height={240} className="w-16 h-60 opacity-40" />
                       </div>
                     )}
                     <CardHeader className="pb-2 px-0 items-start text-left">
@@ -232,7 +233,7 @@ export default function EventsPage() {
                       />
                     ) : (
                       <div className="w-full h-60 flex items-center justify-center rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-100 dark:bg-zinc-800">
-                        <img src="/globe.svg" alt="No event image" className="w-16 h-60 opacity-40" />
+                        <Image src="/globe.svg" alt="No event image" width={64} height={240} className="w-16 h-60 opacity-40" />
                       </div>
                     )}
                     <CardHeader className="pb-2 px-0 items-start text-left">

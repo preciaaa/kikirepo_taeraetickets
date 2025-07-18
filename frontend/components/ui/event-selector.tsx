@@ -14,6 +14,7 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog'
 import { apiRoutes } from '@/lib/apiRoutes';
+import Image from 'next/image';
 
 interface Event {
   id: string
@@ -125,7 +126,7 @@ export function EventSelector({ selectedEvent, onEventSelect }: EventSelectorPro
               </DialogHeader>
 
               {scrapedEvent?.image && (
-                <img src={scrapedEvent.image} alt="Event Poster" className="w-full rounded-lg mb-4" />
+                <Image src={scrapedEvent.image} alt="Event Poster" width={400} height={300} className="w-full rounded-lg mb-4" />
               )}
 
               <div className="space-y-2">

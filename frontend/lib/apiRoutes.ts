@@ -1,7 +1,5 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
-const API_URL = process.env.NEXT_PUBLIC_API_URL || API_BASE_URL;
 const FASTAPI_BACKEND_API_URL = process.env.NEXT_PUBLIC_FASTAPI_BACKEND_API_URL || API_BASE_URL;
-const DEDUP_BACKEND_API_URL = process.env.NEXT_PUBLIC_DEDUP_BACKEND_API_URL || 'http://localhost:5003';
 
 export const apiRoutes = {
 

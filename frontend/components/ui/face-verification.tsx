@@ -22,9 +22,7 @@ export default function FaceVerification({
   const webcamRef = useRef<Webcam>(null)
   const [match, setMatch] = useState<boolean | null>(null)
   const [startVerification, setStartVerification] = useState(true)
-  const [timer, setTimer] = useState(0)
   const [showTimeoutWarning, setShowTimeoutWarning] = useState(false)
-  const [loading, setLoading] = useState(true)
 
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -88,7 +86,6 @@ export default function FaceVerification({
 
     if (startVerification) {
       interval = setInterval(() => {
-        setTimer(prev => prev + 1)
         runVerification()
       }, 1000)
 
@@ -107,7 +104,7 @@ export default function FaceVerification({
       clearInterval(interval)
       clearTimeout(timeout)
     }
-  }, [startVerification])
+  }, [startVerification, compareEndpoint, onFailure, onSuccess, supabase.auth, userId])
 
   return (
     <div className="w-full max-w-md mx-auto space-y-4">
@@ -134,7 +131,6 @@ export default function FaceVerification({
             onClick={() => {
               setStartVerification(true)
               setShowTimeoutWarning(false)
-              setTimer(0)
               setMatch(null)
             }}
             className="mt-2"
