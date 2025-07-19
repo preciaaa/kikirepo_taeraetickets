@@ -6,6 +6,8 @@ const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 const connectToSupabase = require('../db/supabase');
 const supabase = connectToSupabase();
 
+const FRONTEND_BASE_URL = process.env.FRONTEND_BASE_URL;
+
 // === STRIPE CONNECT & PAYMENT ===
 
 router.post('/create-stripe-account', async (req, res) => {
@@ -52,8 +54,8 @@ router.post('/create-stripe-account', async (req, res) => {
     // Create onboarding / login link
     const accountLink = await stripe.accountLinks.create({
       account: stripeAccountId,
-      refresh_url: `http://localhost:3000/onboard`,
-      return_url: `http://localhost:3000/profile`,
+      refresh_url: `${FRONTEND_BASE_URL}:3000/onboard`,
+      return_url: `${FRONTEND_BASE_URL}:3000/profile`,
       type: 'account_onboarding',
     });
 

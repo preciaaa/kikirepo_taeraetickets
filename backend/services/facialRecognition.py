@@ -20,6 +20,9 @@ from supabase import create_client, Client
 
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+API_BASE_URL = os.getenv("NEXT_PUBLIC_API_BASE_URL")
+if not API_BASE_URL:
+    raise RuntimeError("NEXT_PUBLIC_API_BASE_URL not set in environment.")
 
 if not SUPABASE_URL or not SUPABASE_KEY:
     raise RuntimeError("Supabase environment variables not loaded. Check .env.local path.")
@@ -90,7 +93,7 @@ async def compare_faces(
 
     async with httpx.AsyncClient() as client:
         try:
-            user_response = await client.get(f"http://localhost:5000/users/{user_id}")
+            user_response = await client.get(f"{API_BASE_URL}/users/{user_id}")
             user_response.raise_for_status()
         except httpx.HTTPStatusError as e:
             raise HTTPException(status_code=e.response.status_code, detail="User not found")
@@ -105,6 +108,6 @@ async def compare_faces(
         match = bool(similarity > 0.6)  # Cast to native Python bool
 
         if match:
-            await client.put(f"http://localhost:5000/users/{user_id}/verification", json={"verified": True})
+            await client.put(f"{API_BASE_URL}/users/{user_id}/verification", json={"verified": True})
 
     return {"match": match}

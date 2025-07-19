@@ -5,7 +5,8 @@ module.exports = {
       // other domains you may already have,
       'res.klook.com',
       'upload.wikimedia.org',
-      'static.ticketmaster.sg'
+      'static.ticketmaster.sg',
+      'preview.redd.it'
     ],
   },
 } 

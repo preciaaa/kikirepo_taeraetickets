@@ -70,7 +70,7 @@ export default function VerificationPage() {
         method: 'POST',
         body: formData,
       })
-
+      console.log(response)
       if (!response.ok) throw new Error('Failed to extract embedding.')
 
       setNext(true)
