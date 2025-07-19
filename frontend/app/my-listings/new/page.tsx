@@ -9,10 +9,10 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { toast } from "sonner"
 import { Upload, FileText, Loader2, CheckCircle } from "lucide-react"
-import { supabase } from "@/lib/supabaseClient"
 import { EventSelector } from "@/components/ui/event-selector"
 import { apiRoutes } from "@/lib/apiRoutes"
 import Image from 'next/image';
+import { getSupabaseClient } from "@/lib/supabaseClient";
 
 interface ExtractedFields {
   date?: string
@@ -161,6 +161,7 @@ export default function NewIndividualListing() {
     setListingUploading(true)
     
     try {
+      const supabase = getSupabaseClient()
       const { data: { user }, error: userError } = await supabase.auth.getUser()
       if (userError || !user) {
         toast.error("Please log in to upload tickets")
@@ -237,6 +238,7 @@ export default function NewIndividualListing() {
     setListingUploading(true)
     
     try {
+      const supabase = getSupabaseClient()
       const { data: { user }, error: userError } = await supabase.auth.getUser()
       if (userError || !user) {
         toast.error("Please log in to create listings")

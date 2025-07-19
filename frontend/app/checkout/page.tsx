@@ -11,7 +11,7 @@ import {
 } from "@stripe/react-stripe-js";
 import { Button } from "@/components/ui/button";
 import { apiRoutes } from "@/lib/apiRoutes";
-import { supabase } from "@/lib/supabaseClient";
+import { getSupabaseClient } from "@/lib/supabaseClient";
 
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
@@ -115,6 +115,7 @@ export default function CheckoutPage() {
 
   useEffect(() => {
     async function fetchUser() {
+      const supabase = getSupabaseClient()
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user?.id) {
         setUserId(session.user.id);

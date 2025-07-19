@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { supabase } from '@/lib/supabaseClient'
+import { getSupabaseClient } from '@/lib/supabaseClient'
 import {
   Dialog,
   DialogContent,
@@ -21,6 +21,15 @@ export interface Event {
   title: string
 }
 
+interface ScrapedEvent {
+  title: string
+  venue: string
+  date: string
+  image?: string
+  description?: string
+  num_results?: number
+}
+
 interface EventSelectorProps {
   selectedEvent: Event | null
   onEventSelect: (event: Event | null) => void
@@ -32,7 +41,7 @@ export function EventSelector({ selectedEvent, onEventSelect }: EventSelectorPro
   const [eventLoading, setEventLoading] = useState(false)
   const [eventError, setEventError] = useState<string | null>(null)
   const [creatingEvent, setCreatingEvent] = useState(false)
-  const [scrapedEvent, setScrapedEvent] = useState<unknown>(null)
+  const [scrapedEvent, setScrapedEvent] = useState<ScrapedEvent | null>(null)
   const [showScrapeModal, setShowScrapeModal] = useState(false)
 
 
@@ -43,6 +52,7 @@ export function EventSelector({ selectedEvent, onEventSelect }: EventSelectorPro
     }
 
     setEventLoading(true)
+    const supabase = getSupabaseClient()
     supabase
       .from('events')
       .select('*')
@@ -53,7 +63,14 @@ export function EventSelector({ selectedEvent, onEventSelect }: EventSelectorPro
           setEventError('Failed to fetch events')
           setEventSuggestions([])
         } else {
-          setEventSuggestions(data || [])
+          setEventSuggestions(
+            (Array.isArray(data)
+              ? data.map(item => ({
+                  id: String(item.id),
+                  title: String(item.title)
+                }))
+              : [])
+          )
         }
       })
   }, [eventSearch])
@@ -70,7 +87,7 @@ export function EventSelector({ selectedEvent, onEventSelect }: EventSelectorPro
       const result = await response.json()
   
       if (result.num_results === 1) {
-        setScrapedEvent({ ...result })
+        setScrapedEvent(result as ScrapedEvent)
         setShowScrapeModal(true)
       } else if (result.num_results > 1) {
         alert(`Found ${result.num_results} events. Please narrow your search.`)
@@ -139,6 +156,7 @@ export function EventSelector({ selectedEvent, onEventSelect }: EventSelectorPro
                 </Button>
                 <Button
                   onClick={async () => {
+                    if (!scrapedEvent) return;
                     setCreatingEvent(true)
                     try {
                       const res = await fetch(apiRoutes.createEvent, {

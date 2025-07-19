@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabaseClient'
+import { getSupabaseClient } from '@/lib/supabaseClient'
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import ReCAPTCHA from "react-google-recaptcha"
@@ -17,6 +17,7 @@ export default function SignIn() {
 
   useEffect(() => {
     const checkAuth = async () => {
+      const supabase = getSupabaseClient()
       const {
         data: { session },
         error,
@@ -48,6 +49,7 @@ export default function SignIn() {
       return
     }
 
+    const supabase = getSupabaseClient()
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,

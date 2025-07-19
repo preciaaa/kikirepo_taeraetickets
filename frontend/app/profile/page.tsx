@@ -9,7 +9,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { supabase } from "@/lib/supabaseClient";
+import { getSupabaseClient } from "@/lib/supabaseClient";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useCallback } from "react";
 import Image from 'next/image';
@@ -60,6 +60,7 @@ export default function ProfilePage() {
 
   useEffect(() => {
     const initialise = async () => {
+      const supabase = getSupabaseClient();
       const {
         data: { session },
       } = await supabase.auth.getSession();
@@ -112,6 +113,7 @@ export default function ProfilePage() {
   }, [userId]);
 
   const handleLogout = async () => {
+    const supabase = getSupabaseClient();
     await supabase.auth.signOut();
     localStorage.removeItem("user_id");
     router.push("/auth/login");
@@ -356,9 +358,9 @@ export default function ProfilePage() {
                         setSaving(true);
                         const {
                           data: { user },
-                        } = await supabase.auth.getUser();
+                        } = await getSupabaseClient().auth.getUser();
                         if (user && tempPic) {
-                          await supabase.auth.updateUser({
+                          await getSupabaseClient().auth.updateUser({
                             data: { profile_pic: tempPic },
                           });
                           setSelectedPic(tempPic);

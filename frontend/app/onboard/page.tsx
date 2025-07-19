@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabaseClient'
+import { getSupabaseClient } from '@/lib/supabaseClient'
 import { Button } from '@/components/ui/button'
 import { apiRoutes } from '@/lib/apiRoutes';
 
@@ -14,6 +14,7 @@ export default function OnboardingPage() {
 
   useEffect(() => {
     async function fetchUser() {
+      const supabase = getSupabaseClient()
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) {
         router.replace('/auth/login') // redirect if not logged in

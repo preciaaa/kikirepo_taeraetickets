@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
-import { supabase } from '../lib/supabaseClient'
+import { getSupabaseClient } from '../lib/supabaseClient'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 
@@ -44,6 +44,7 @@ export const useCustomSessionTimer = () => {
             if (remaining <= 0) {
                 console.log('Session expired, logging out')
                 clearInterval(interval)
+                const supabase = getSupabaseClient()
                 supabase.auth.signOut()
                 localStorage.removeItem('user_id');
                 localStorage.removeItem('customSessionStart')

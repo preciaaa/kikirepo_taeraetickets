@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabaseClient";
+import { getSupabaseClient } from "@/lib/supabaseClient";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import ReCAPTCHA from "react-google-recaptcha";
@@ -20,6 +20,7 @@ export default function SignUpPage() {
 
   useEffect(() => {
     const checkAuth = async () => {
+      const supabase = getSupabaseClient()
       const {
         data: { session },
       } = await supabase.auth.getSession();
@@ -52,6 +53,7 @@ export default function SignUpPage() {
     }
 
     const FRONTEND_BASE_URL = process.env.NEXT_PUBLIC_FRONTEND_BASE_URL || 'http://localhost:3000';
+    const supabase = getSupabaseClient()
     const { error } = await supabase.auth.signUp({
       email,
       password,

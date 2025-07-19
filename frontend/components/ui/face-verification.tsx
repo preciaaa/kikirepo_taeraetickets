@@ -17,7 +17,7 @@ export default function FaceVerification({
   userId,
   onSuccess,
   onFailure,
-  compareEndpoint = apiRoutes.compareFacesCustom(),
+  compareEndpoint = apiRoutes.compareFaces,
 }: FaceVerificationProps) {
   const webcamRef = useRef<Webcam>(null)
   const [match, setMatch] = useState<boolean | null>(null)

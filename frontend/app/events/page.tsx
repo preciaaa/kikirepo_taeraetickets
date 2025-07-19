@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabaseClient'
+import { getSupabaseClient } from '@/lib/supabaseClient'
 import {
   Card,
   CardTitle,
@@ -29,9 +29,7 @@ function slugify(text: string) {
     .trim()
 }
 
-interface Listing {
-  event_id: number
-}
+
 
 interface Event {
   id: number
@@ -52,6 +50,7 @@ export default function EventsPage() {
 
   useEffect(() => {
     const checkAuthAndFetchEvents = async () => {
+      const supabase = getSupabaseClient()
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) {
         router.push('/auth/login')
@@ -70,14 +69,21 @@ export default function EventsPage() {
         return setLoading(false)
       }
   
-      const listingCounts = listingsData?.reduce((acc: Record<number, number>, listing: Listing) => {
-        acc[listing.event_id] = (acc[listing.event_id] || 0) + 1
+      const listingCounts = listingsData?.reduce((acc: Record<number, number>, listing: { event_id: unknown }) => {
+        const eventId = Number(listing.event_id)
+        if (!isNaN(eventId)) {
+          acc[eventId] = (acc[eventId] || 0) + 1
+        }
         return acc
       }, {}) || {}
   
-      const eventsWithCount = eventsData.map(event => ({
-        ...event,
-        listingCount: listingCounts[event.id] || 0
+      const eventsWithCount: Event[] = eventsData.map(event => ({
+        id: Number(event.id),
+        title: String(event.title),
+        description: String(event.description),
+        venue: String(event.venue),
+        img_url: event.img_url ? String(event.img_url) : undefined,
+        listingCount: listingCounts[Number(event.id)] || 0
       }))
   
       setEvents(eventsWithCount)
@@ -88,6 +94,7 @@ export default function EventsPage() {
   }, [router])  
 
   useEffect(() => {
+    const supabase = getSupabaseClient()
     supabase.auth.getSession().then(({ data: { session } }) => {
       // console.log('🔍 session on /events:', session)
   
